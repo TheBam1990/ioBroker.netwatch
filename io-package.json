@@ -1,0 +1,369 @@
+{
+  "common": {
+    "name": "netwatch",
+    "version": "0.1.1",
+    "titleLang": { "en": "Network Analyzer", "de": "Netzwerkanalyse" },
+    "desc": {
+      "en": "Passive packet capture and analysis using Wireshark tools",
+      "de": "Passive Paketerfassung und Analyse mit Wireshark-Werkzeugen"
+    },
+    "authors": ["TheBam1990"],
+    "licenseInformation": { "type": "free", "license": "MIT" },
+    "platform": "Javascript/Node.js",
+    "icon": "netwatch.svg",
+    "extIcon": "https://raw.githubusercontent.com/TheBam1990/ioBroker.netwatch/main/admin/netwatch.svg",
+    "mode": "daemon",
+    "type": "network",
+    "tier": 3,
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": { "config": "json" },
+    "enabled": true,
+    "localLinks": { "_default": { "link": "http://%ip%:%webPort%" } },
+    "dependencies": [{ "js-controller": ">=6.0.11" }],
+    "globalDependencies": [{ "admin": ">=7.8.0" }],
+    "news": {
+      "0.1.1": {
+        "en": "Added guided system setup, capture permission checks and a new adapter icon",
+        "de": "Geführte Systemeinrichtung, Prüfung der Capture-Rechte und neues Adaptersymbol ergänzt"
+      },
+      "0.1.0": {
+        "en": "Initial packet capture and analysis release",
+        "de": "Erste Version zur Paketerfassung und Netzwerkanalyse"
+      }
+    }
+  },
+  "encryptedNative": ["webPassword"],
+  "native": {
+    "captureInterface": "eth0",
+    "autoStart": false,
+    "memoryPacketLimit": 50000,
+    "captureDirectory": "",
+    "maxCaptureSizeMb": 500,
+    "maxTotalStorageMb": 5120,
+    "retentionDays": 7,
+    "webEnabled": true,
+    "webBind": "127.0.0.1",
+    "webPort": 8110,
+    "webUsername": "admin",
+    "webPassword": "",
+    "statisticsIntervalSec": 2
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": { "name": "Information" },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": "Connection",
+        "type": "boolean",
+        "role": "indicator.connected",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.tsharkAvailable",
+      "type": "state",
+      "common": {
+        "name": "tshark available",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.dumpcapAvailable",
+      "type": "state",
+      "common": {
+        "name": "dumpcap available",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.lastError",
+      "type": "state",
+      "common": {
+        "name": "Last error",
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": false,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.capturePermission",
+      "type": "state",
+      "common": {
+        "name": "Capture permission available",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.setupRequired",
+      "type": "state",
+      "common": {
+        "name": "System setup required",
+        "type": "boolean",
+        "role": "indicator.maintenance",
+        "read": true,
+        "write": false,
+        "def": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.setupHint",
+      "type": "state",
+      "common": {
+        "name": "System setup instructions",
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": false,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture",
+      "type": "channel",
+      "common": { "name": "Capture" },
+      "native": {}
+    },
+    {
+      "_id": "capture.running",
+      "type": "state",
+      "common": {
+        "name": "Running",
+        "type": "boolean",
+        "role": "indicator.working",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.paused",
+      "type": "state",
+      "common": {
+        "name": "Paused",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.interface",
+      "type": "state",
+      "common": {
+        "name": "Interface",
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": false,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.packetCount",
+      "type": "state",
+      "common": {
+        "name": "Packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.byteCount",
+      "type": "state",
+      "common": {
+        "name": "Bytes",
+        "type": "number",
+        "role": "value",
+        "unit": "B",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.packetsPerSecond",
+      "type": "state",
+      "common": {
+        "name": "Packets/s",
+        "type": "number",
+        "role": "value",
+        "unit": "packets/s",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "capture.bytesPerSecond",
+      "type": "state",
+      "common": {
+        "name": "Bytes/s",
+        "type": "number",
+        "role": "value",
+        "unit": "B/s",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "statistics",
+      "type": "channel",
+      "common": { "name": "Statistics" },
+      "native": {}
+    },
+    {
+      "_id": "statistics.devices",
+      "type": "state",
+      "common": {
+        "name": "Devices",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "statistics.conversations",
+      "type": "state",
+      "common": {
+        "name": "Conversations",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols",
+      "type": "channel",
+      "common": { "name": "Protocols" },
+      "native": {}
+    },
+    {
+      "_id": "protocols.tcp.packets",
+      "type": "state",
+      "common": {
+        "name": "TCP packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols.udp.packets",
+      "type": "state",
+      "common": {
+        "name": "UDP packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols.icmp.packets",
+      "type": "state",
+      "common": {
+        "name": "ICMP packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols.dns.packets",
+      "type": "state",
+      "common": {
+        "name": "DNS packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols.mqtt.packets",
+      "type": "state",
+      "common": {
+        "name": "MQTT packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "protocols.tls.packets",
+      "type": "state",
+      "common": {
+        "name": "TLS packets",
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    }
+  ]
+}

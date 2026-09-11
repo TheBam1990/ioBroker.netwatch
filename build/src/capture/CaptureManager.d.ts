@@ -1,0 +1,30 @@
+import { EventEmitter } from "node:events";
+import type { CaptureSession } from "../types";
+import type { TsharkService } from "../tshark/TsharkService";
+export declare class CaptureManager extends EventEmitter {
+    private directory;
+    private tsharkService;
+    private capture?;
+    private eventPath?;
+    private eventTimer?;
+    private eventOffset;
+    private eventRemainder;
+    private draining;
+    private lastPacketId;
+    private session?;
+    private stopping;
+    private processError;
+    constructor(directory: string, tsharkService: TsharkService);
+    current(): CaptureSession | undefined;
+    start(iface: string, captureFilter?: string, displayFilter?: string): Promise<CaptureSession>;
+    pause(): void;
+    resume(): void;
+    stop(): Promise<CaptureSession | undefined>;
+    shutdown(): Promise<void>;
+    private signalGroup;
+    private fail;
+    private clearEventTimer;
+    private drainEvents;
+    private analyzeSnapshot;
+    private removeEventFile;
+}

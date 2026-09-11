@@ -1,0 +1,66 @@
+{
+  "name": "iobroker.netwatch",
+  "version": "0.1.1",
+  "description": "Passive packet capture and network analysis for ioBroker using dumpcap and tshark",
+  "author": {
+    "name": "TheBam1990"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/TheBam1990/ioBroker.netwatch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheBam1990/ioBroker.netwatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TheBam1990/ioBroker.netwatch/issues"
+  },
+  "main": "build/src/main.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ioBroker",
+    "network",
+    "packet",
+    "capture",
+    "wireshark",
+    "tshark",
+    "dumpcap",
+    "pcapng"
+  ],
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.4.3",
+    "busboy": "^1.6.0",
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@iobroker/eslint-config": "^2.3.4",
+    "@types/busboy": "^1.5.4",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.18.0",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src --max-warnings 0",
+    "check": "npm run build && npm test && npm run lint",
+    "pack": "npm pack"
+  },
+  "files": [
+    "admin",
+    "bin",
+    "build",
+    "web",
+    "io-package.json",
+    "LICENSE",
+    "README.md",
+    "READMEde.md"
+  ]
+}

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ioBroker Netwatch</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <aside>
+      <div class="brand">
+        <span>◉</span><b>NETWATCH</b><small>ioBroker Network Analyzer</small>
+      </div>
+      <nav id="nav">
+        <button class="active" data-page="dashboard">▦ Dashboard</button
+        ><button data-page="live">◉ Live Capture</button
+        ><button data-page="packets">☷ Packets</button
+        ><button data-page="conversations">⇄ Conversations</button
+        ><button data-page="endpoints">⌾ Endpoints</button
+        ><button data-page="devices">▣ Devices</button
+        ><button data-page="dns">DNS DNS</button
+        ><button data-page="mqtt">MQ MQTT</button
+        ><button data-page="protocols">◫ Protocols</button
+        ><button data-page="captures">▤ Captures</button
+        ><button data-page="settings">⚙ Settings</button
+        ><button data-page="about">ⓘ About</button>
+      </nav>
+      <div class="privacy">
+        ⚠ Captures können sensible Daten enthalten. Keine Cloud-Übertragung.
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <h1 id="title">Dashboard</h1>
+          <p id="subtitle">Passiver Netzwerkmonitor mit Wireshark-Technik</p>
+        </div>
+        <div class="status">
+          <span id="dot"></span
+          ><b id="statusText">Verbindung wird hergestellt …</b
+          ><button id="theme">☾</button>
+        </div>
+      </header>
+      <div id="alert" class="alert hidden"></div>
+      <section id="dashboard" class="page active">
+        <div class="cards">
+          <article>
+            <label>Pakete</label><strong id="statPackets">0</strong>
+          </article>
+          <article>
+            <label>Bytes</label><strong id="statBytes">0 B</strong>
+          </article>
+          <article>
+            <label>Pakete/s</label><strong id="statPps">0</strong>
+          </article>
+          <article>
+            <label>Geräte</label><strong id="statDevices">0</strong>
+          </article>
+          <article>
+            <label>Verbindungen</label><strong id="statConvs">0</strong>
+          </article>
+          <article>
+            <label>Laufzeit</label><strong id="statRuntime">00:00:00</strong>
+          </article>
+        </div>
+        <div class="two">
+          <article class="panel">
+            <h2>Protokolle</h2>
+            <div id="protocolChart" class="bars"></div>
+          </article>
+          <article class="panel">
+            <h2>Systemstatus</h2>
+            <div id="dependencyStatus"></div>
+            <p class="hint">
+              Für den Verkehr anderer Geräte wird ein Mirror-/SPAN-Port,
+              Router-Capture oder Netzwerk-TAP benötigt.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section id="live" class="page">
+        <article class="panel controls">
+          <div>
+            <label>Interface</label
+            ><select id="iface"></select>
+          </div>
+          <div class="grow">
+            <label>Capture Filter (BPF)</label
+            ><input
+              id="captureFilter"
+              placeholder="host 192.168.1.50 and tcp"
+            />
+          </div>
+          <button class="primary" id="start">▶ Start</button
+          ><button id="pause">Ⅱ Pause</button
+          ><button id="resume">▶ Weiter</button
+          ><button class="danger" id="stop">■ Stop</button>
+        </article>
+        <article class="panel filter">
+          <label>Wireshark Display Filter</label
+          ><input
+            id="displayFilter"
+            placeholder="ip.addr == 192.168.1.20 && mqtt"
+          /><button id="validate">Prüfen</button><span id="filterResult"></span>
+        </article>
+        <div class="split">
+          <article class="panel packet-panel">
+            <div class="table-head">
+              <h2>Live-Pakete</h2>
+              <span id="visibleCount"></span>
+            </div>
+            <div class="packet-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nr.</th>
+                    <th>Zeit</th>
+                    <th>Quelle</th>
+                    <th>Ziel</th>
+                    <th>Protokoll</th>
+                    <th>Src-Port</th>
+                    <th>Dst-Port</th>
+                    <th>Länge</th>
+                    <th>Info</th>
+                  </tr>
+                </thead>
+                <tbody id="packetRows"></tbody>
+              </table>
+            </div>
+          </article>
+          <article class="panel details">
+            <h2>Paketdetails</h2>
+            <pre id="detail">Paket in der Tabelle auswählen</pre>
+            <h2>Hex / ASCII</h2>
+            <pre id="hex"></pre>
+          </article>
+        </div>
+      </section>
+      <section id="packets" class="page">
+        <article class="panel">
+          <h2>Pakete im Ringbuffer</h2>
+          <div class="packet-table standalone">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nr.</th>
+                  <th>Zeit</th>
+                  <th>Quelle</th>
+                  <th>Ziel</th>
+                  <th>Protokoll</th>
+                  <th>Ports</th>
+                  <th>Länge</th>
+                  <th>Info</th>
+                </tr>
+              </thead>
+              <tbody id="allPacketRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+      <section id="conversations" class="page">
+        <article class="panel">
+          <h2>Conversations</h2>
+          <div id="conversationsTable"></div>
+        </article>
+      </section>
+      <section id="endpoints" class="page">
+        <article class="panel">
+          <h2>Endpoints</h2>
+          <div id="endpointsTable"></div>
+        </article>
+      </section>
+      <section id="devices" class="page">
+        <article class="panel">
+          <h2>Passiv erkannte Geräte</h2>
+          <div id="devicesTable"></div>
+        </article>
+      </section>
+      <section id="dns" class="page">
+        <article class="panel">
+          <h2>DNS-Auswertung</h2>
+          <p>
+            DNS-Pakete erscheinen in der Live-Ansicht. Die spezialisierte
+            Historie wird aus den tshark-Protokollfeldern aufgebaut.
+          </p>
+        </article>
+      </section>
+      <section id="mqtt" class="page">
+        <article class="panel">
+          <h2>MQTT-Auswertung</h2>
+          <p>
+            MQTT wird anhand der tatsächlichen tshark-Dissektion erkannt, nicht
+            nur anhand von Port 1883.
+          </p>
+        </article>
+      </section>
+      <section id="protocols" class="page">
+        <article class="panel">
+          <h2>Erkannte Protokolle</h2>
+          <div id="protocolTable"></div>
+        </article>
+      </section>
+      <section id="captures" class="page">
+        <article class="panel controls">
+          <input type="file" id="upload" accept=".pcap,.pcapng" /><button
+            id="uploadBtn"
+          >
+            Capture importieren</button
+          ><button id="refreshCaptures">Aktualisieren</button>
+        </article>
+        <article class="panel">
+          <h2>Capture-Dateien</h2>
+          <div id="captureFiles"></div>
+        </article>
+      </section>
+      <section id="settings" class="page">
+        <article class="panel">
+          <h2>Systemeinrichtung</h2>
+          <p>
+            Netwatch prüft automatisch Wireshark-Werkzeuge und sichere
+            Capture-Rechte. Es führt keine Befehle mit Root-Rechten aus.
+          </p>
+          <div id="setupChecklist"></div>
+          <div id="setupCommands"></div>
+          <button id="copySetup">Befehle kopieren</button
+          ><button id="recheckSetup">Erneut prüfen</button>
+        </article>
+        <article class="panel">
+          <h2>Adaptereinstellungen</h2>
+          <p>
+            Interface, Limits, Bind-Adresse, Port und Zugangsschutz werden in
+            der ioBroker-Adapterkonfiguration gepflegt.
+          </p>
+          <p>
+            Capture Filter (BPF) begrenzen Daten bereits beim Mitschneiden.
+            Display Filter beeinflussen nur die von tshark analysierte und
+            angezeigte Auswahl.
+          </p>
+        </article>
+      </section>
+      <section id="about" class="page">
+        <article class="panel">
+          <h2>ioBroker.netwatch 0.1.1</h2>
+          <p>
+            Passiver Monitor auf Basis von dumpcap, PCAPNG und tshark. Keine
+            Firewall, kein MITM und keine Manipulation von Netzwerkverkehr.
+          </p>
+        </article>
+      </section>
+    </main>
+    <script src="app.js?v=20260911-3"></script>
+  </body>
+</html>
