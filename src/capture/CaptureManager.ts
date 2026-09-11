@@ -252,7 +252,10 @@ export class CaptureManager extends EventEmitter {
       return;
     }
     this.draining = true;
-    const snapshot = path.join(os.tmpdir(), `netwatch-${this.session.id}.pcapng`);
+    const snapshot = path.join(
+      os.tmpdir(),
+      `netwatch-${this.session.id}.pcapng`,
+    );
     try {
       await fs.promises.copyFile(this.session.filePath, snapshot);
       const output = await this.tsharkService.analyze(

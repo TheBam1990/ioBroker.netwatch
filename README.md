@@ -1,55 +1,51 @@
 # ioBroker.netwatch
 
-[Deutsch](READMEde.md) | English
+[Deutsche Anleitung](READMEde.md) | English
 
-`ioBroker.netwatch` ist ein passiver Netzwerkmonitor für Linux. Der Adapter nutzt **dumpcap** für die Paketerfassung, **PCAPNG** als Rohformat und **tshark** für Wireshark-kompatible Protokolldekodierung. Einzelne Pakete werden bewusst nicht als ioBroker-States angelegt.
+`ioBroker.netwatch` is a passive Linux network monitor for ioBroker. It uses `dumpcap` for packet capture, PCAPNG for raw data, and `tshark` for Wireshark-compatible protocol decoding. Individual packets are deliberately not exposed as ioBroker states.
 
-> Netzwerk-Captures können Kennwörter, Cookies, Gerätekennungen und andere sensible Inhalte enthalten. Netwatch sendet keine Daten an Cloud-Dienste und enthält weder Firewall-, MITM- noch Manipulationsfunktionen.
+> Packet captures can contain passwords, cookies, device identifiers, and other sensitive information. Netwatch neither uploads capture data nor provides firewall, MITM, decryption, or traffic-manipulation features.
 
-## Funktionen
+## Features
 
-- Interface-Erkennung mit IPv4/IPv6, MAC, Status und RX/TX-Zählern
-- Start, Pause, Fortsetzen und Stoppen eines Captures
-- BPF-Capture-Filter und validierte Wireshark-Display-Filter
-- Live-Übertragung als gebündelte WebSocket-Nachrichten
-- begrenzter Paket-Ringbuffer im RAM
-- Fast Path mit kleinen Tabellenzeilen; vollständige tshark-Details nur auf Auswahl
-- hierarchische tshark-JSON-Daten und Hex/ASCII-Dump
-- PCAPNG-Aufzeichnung, Download, sicherer Import, Analyse und bestätigtes Löschen
-- Conversations, Endpoints, Geräte und dynamische Protokollstatistik
-- zusammengefasste ioBroker-States
-- Größen-, Gesamtstorage- und Retention-Limits
-- zentraler Shutdown für dumpcap, tshark, HTTP, WebSocket und Timer
-- Dark/Light Mode und responsive Oberfläche
+- Detects interfaces and displays IPv4/IPv6, MAC, link status, and RX/TX bytes
+- Starts, pauses, resumes, and stops packet captures
+- Separates BPF capture filters from validated Wireshark display filters
+- Streams live packet batches through WebSocket
+- Uses a bounded in-memory ring buffer and configurable storage limits
+- Keeps the live fast path small and loads full protocol details on demand
+- Displays generic tshark protocol trees plus packet hex/ASCII data
+- Records, imports, analyzes, downloads, and safely deletes PCAP/PCAPNG files
+- Aggregates conversations, endpoints, devices, and protocol statistics
+- Publishes only summarized values as ioBroker states
+- Provides a responsive light/dark web interface and guided system checks
+- Cleans up capture processes, sockets, streams, and timers on adapter unload
 
-Die Protokollerkennung erfolgt über tshark. Damit können neben Ethernet, IPv4/IPv6, TCP, UDP und ICMP auch vorhandene Wireshark-Dissektoren wie DNS, DHCP, HTTP, TLS, MQTT, CoAP, NTP, SSDP, Modbus, BACnet, SNMP, SMB, RTP, RTSP, IEC 60870-5-103 und IEC 61850 sichtbar werden, sofern Wireshark den jeweiligen Verkehr dekodieren kann. Ein Port wird nicht pauschal einem Anwendungsprotokoll zugeordnet.
+Protocol detection comes from tshark dissectors rather than fixed port assumptions. It includes Ethernet, ARP, IPv4/IPv6, TCP, UDP, ICMP, DNS, DHCP, HTTP, TLS, MQTT, CoAP, NTP, SSDP, Modbus, BACnet, SNMP, SMB, RTP, RTSP, IEC 60870-5-103, IEC 61850, and other protocols decoded by the installed Wireshark version.
 
-## Wichtiger Hinweis zum sichtbaren Verkehr
+## Network visibility
 
-Ein normaler Rechner sieht in einem modernen geswitchten Ethernet-Netz überwiegend eigenen Verkehr, Broadcasts und Multicasts. Für die Analyse des gesamten Netzes ist typischerweise ein **SPAN/Mirror-Port** eines Managed Switches, ein Capture direkt auf Router/Gateway oder ein Netzwerk-TAP nötig.
+A host connected to a modern switched Ethernet network normally sees its own traffic plus broadcasts and multicasts, but not all traffic from other hosts. Whole-network monitoring usually requires a managed switch SPAN/mirror port, capture on the router or gateway, or a network TAP.
 
-## Voraussetzungen
+## Requirements
 
-- Linux (Debian, Ubuntu, Raspberry Pi OS)
-- Node.js 20 oder neuer
-- ioBroker js-controller 6 oder neuer
-- `tshark` und `dumpcap`
+- Linux: Debian, Ubuntu, Raspberry Pi OS, or a comparable distribution
+- Node.js 22 or newer
+- ioBroker js-controller 6 or newer
+- `tshark` and `dumpcap`
 
-Netwatch 0.1.1 includes a guided **System setup** page. It checks `tshark`,
-`dumpcap`, and whether the unprivileged ioBroker user can list capture
-interfaces. Missing steps are displayed as copyable commands. The adapter
-never executes these privileged commands automatically.
-
-Installation auf Debian/Ubuntu/Raspberry Pi OS:
+Install the Wireshark command-line tools on Debian-derived systems:
 
 ```bash
 sudo apt update
 sudo apt install tshark
 ```
 
-### Sichere dumpcap-Rechte
+The **Settings → System setup** page checks whether `tshark` and `dumpcap` are available and whether the unprivileged ioBroker user can list interfaces. A missing dependency does not crash the adapter; the UI and ioBroker states show the problem and provide copyable setup instructions.
 
-Der Adapter darf **nicht als root** laufen. Debian-Pakete können nicht-root Captures über die Gruppe `wireshark` und Linux-Capabilities erlauben. Die genaue Paketabfrage kann erneut geöffnet werden mit:
+## Safe dumpcap permissions
+
+Do not run the adapter as root. Debian packages can permit unprivileged capture through the `wireshark` group and narrowly scoped Linux capabilities:
 
 ```bash
 sudo dpkg-reconfigure wireshark-common
@@ -59,22 +55,19 @@ getcap /usr/bin/dumpcap
 sudo systemctl restart iobroker
 ```
 
-Diese Rechte werden vom Adapter niemals automatisch gesetzt. Prüfen Sie die Befehle passend zu Ihrem System. `dumpcap` erhält nur die Capture-Capabilities; der ioBroker-Adapter bleibt unprivilegiert.
+Review these commands for the target system. Netwatch only displays them and never changes privileges automatically. The adapter process remains unprivileged; only `dumpcap` receives packet-capture capabilities.
 
 ## Installation
 
-Install directly from GitHub in ioBroker Admin using the custom URL:
+In ioBroker Admin, choose installation from a custom URL and enter:
 
 ```text
 https://github.com/TheBam1990/ioBroker.netwatch
 ```
 
-Create an instance, open its web UI, and select **Settings → System setup**.
-When all three checks are green, select the capture interface and start a
-capture. The default bind address is `127.0.0.1`; exposing the separate web UI
-to a LAN must be an explicit configuration choice and requires authentication.
+Create an instance and open its web UI. Complete **Settings → System setup**, select an interface, and start a capture. The separate web server binds only to `127.0.0.1` by default. LAN exposure must be selected explicitly and requires a strong username and password.
 
-Entwicklungspaket bauen:
+For local development packages:
 
 ```bash
 npm ci
@@ -82,36 +75,36 @@ npm run check
 npm pack
 ```
 
-Danach die erzeugte `.tgz` über ioBroker Admin **Adapter → Aus eigener URL/Datei** installieren oder auf dem Host:
+Install the resulting archive through ioBroker Admin or on the host:
 
 ```bash
-sudo -u iobroker iobroker url /pfad/iobroker.netwatch-0.1.0.tgz
+sudo -u iobroker iobroker url /path/iobroker.netwatch-0.1.1.tgz
 sudo -u iobroker iobroker add netwatch
 ```
 
-## Konfiguration
+## Configuration
 
-- **Capture Interface:** z. B. `eth0`
-- **Auto Start:** beim Adapterstart mitschneiden
-- **Memory Packet Limit:** 10.000, 50.000 oder 100.000 Tabellenpakete
-- **Capture Directory:** leer verwendet das ioBroker-Datenverzeichnis
-- **Maximum Capture Size / Total Storage / Retention:** harte Speichergrenzen
-- **Web Bind:** standardmäßig `127.0.0.1`; LAN-Zugriff bewusst z. B. mit `0.0.0.0`
-- **Web Port:** standardmäßig `8110`
-- **Web Username / Password:** bei LAN-Bindung zwingend ein starkes Kennwort setzen
+- **Capture interface:** interface such as `eth0` or `enp3s0`
+- **Auto start:** begin capturing when the adapter starts
+- **Memory packet limit:** 10,000, 50,000, or 100,000 live rows
+- **Capture directory:** empty selects the ioBroker adapter data directory
+- **Maximum capture size / total storage / retention:** storage boundaries
+- **Web bind:** `127.0.0.1` by default; `0.0.0.0` explicitly exposes it to LAN
+- **Web port:** `8110` by default
+- **Web username/password:** required when binding outside localhost
 
-Eine separate Schnittstelle ist nötig, weil Paket-Livedaten nicht als ioBroker-States transportiert werden. Sie nutzt HTTP Basic Authentication und öffnet standardmäßig **keinen** unauthentifizierten Port auf allen Interfaces. Nutzen Sie für nicht vertrauenswürdige Netze zusätzlich einen TLS-Reverse-Proxy.
+HTTP Basic Authentication protects the standalone interface. Use a TLS reverse proxy when accessing sensitive capture data across an untrusted network.
 
-## Filter
+## Filters
 
-Capture Filter sind BPF-Ausdrücke und reduzieren die Daten bereits vor der Speicherung:
+Capture filters are BPF expressions. They reduce data before it is stored:
 
 ```text
 host 192.168.1.50 and tcp
 port 1883
 ```
 
-Display Filter werden von tshark validiert und filtern die dekodierte Anzeige:
+Display filters use Wireshark syntax and filter decoded output:
 
 ```text
 ip.addr == 192.168.1.55
@@ -119,25 +112,22 @@ tcp.port == 443 && tls
 mqtt.topic contains "zigbee2mqtt"
 ```
 
-Ein ungültiger Display Filter beendet keinen bestehenden Capture. Der tshark-Fehler wird in der Oberfläche angezeigt.
+Netwatch validates display filters with tshark before applying them. An invalid display filter reports the tshark error without stopping the active capture.
 
-## Capture-Dateien
+## Capture files
 
-Jede Sitzung erhält eine zufällige ID und eine eigene `.pcapng`. Dateien können in der Seite **Captures** heruntergeladen, analysiert, importiert und nach Bestätigung gelöscht werden. Imports akzeptieren ausschließlich `.pcap`/`.pcapng`, begrenzen die Größe und verhindern absolute Pfade sowie `../`-Traversal.
+Each session receives a random identifier and a dedicated `.pcapng` file. The Captures page supports download, analysis, import, and confirmed deletion. Imports accept only `.pcap` and `.pcapng`, enforce upload limits, reject unsafe paths, and remain inside the configured adapter data directory.
 
-## Fehlerbehebung
+## Troubleshooting
 
-- **tshark/dumpcap fehlt:** `sudo apt install tshark`
-- **Permission denied:** Gruppenmitgliedschaft und `getcap /usr/bin/dumpcap` prüfen; danach ioBroker neu starten
-- **Andere Geräte fehlen:** Mirror-Port/Router/TAP verwenden
-- **Filter ungültig:** zwischen BPF Capture Filter und Wireshark Display Filter unterscheiden
-- **Webseite nicht erreichbar:** Bind-Adresse, Port, Firewall und Adapterlog prüfen
-- **Interface verschwand:** Capture stoppen, Interface neu auswählen und erneut starten
-- **System setup remains red:** Run the displayed verification commands as the
-  `iobroker` user and restart the complete ioBroker service after changing group
-  membership.
+- **tshark or dumpcap missing:** install the `tshark` package.
+- **Permission denied:** check group membership and `getcap /usr/bin/dumpcap`, then restart the complete ioBroker service.
+- **Traffic from other devices missing:** configure a mirror port, router capture, or TAP.
+- **Filter rejected:** distinguish BPF capture filters from Wireshark display filters.
+- **Web UI unavailable:** verify bind address, port, firewall, and adapter log.
+- **Interface disappeared:** stop capture, select an available interface, and start again.
 
-## Entwicklung und Tests
+## Development and tests
 
 ```bash
 npm run build
@@ -145,20 +135,26 @@ npm test
 npm run lint
 ```
 
-Tests decken Pfad-/Filtervalidierung, Parser, Normalisierung, Ringbuffer sowie Conversation- und Device-Aggregation ab. Testdaten sind synthetisch; private Captures gehören nicht ins Repository.
+Tests cover input and path validation, parser normalization, the bounded ring buffer, and conversation/device aggregation. Test data is synthetic; private network captures must never be committed.
 
-## Noch nicht vollständig in 0.1.0
+## Current scope
 
-Die spezialisierten DNS-, MQTT-, TLS- und HTTP-Seiten zeigen zunächst die von tshark erkannten Pakete über Live-Tabelle und Detailpfad; eigene historisierte Feldtabellen und SQLite-Metadatenpersistenz sind für die nächste Ausbaustufe vorgesehen. Rohdaten und vollständige Dekodierung sind bereits über PCAPNG und den Detailpfad verfügbar. Spaltenbreiten und serverseitige Sortierung sehr großer Offline-Captures sind ebenfalls noch nicht persistent.
+Version 0.1.1 exposes decoded DNS, MQTT, TLS, and HTTP traffic through the live packet table and generic detail path. Dedicated historical field tables and SQLite metadata persistence are planned for a later release. PCAPNG raw data, generic full decoding, bounded live analysis, and aggregated statistics are already available.
 
-## Datenschutz und Sicherheit
+## Changelog
 
-- keine Telemetrie
-- keine Cloud- oder Drittanbieterübertragung
-- keine Shell-Konkatenation; Prozesse werden mit getrennten Argumentarrays gestartet
-- keine Firewalländerungen, Paketblockierung, TLS-Entschlüsselung oder Zertifikatsinjektion
-- keine kompletten Payloads im ioBroker-Log
+### 0.1.1 (2026-09-11)
 
-## Lizenz
+- Added guided dependency and capture-permission checks
+- Added a dedicated adapter icon
+- Improved GitHub installation documentation and repository metadata
 
-MIT
+### 0.1.0
+
+- Initial packet capture, analysis, web UI, and PCAPNG release
+
+## License
+
+MIT License
+
+Copyright (c) 2026 TheBam1990

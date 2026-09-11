@@ -57,11 +57,13 @@ export class TsharkService {
         });
         child.once("error", reject);
         child.once("exit", (code, signal) => {
-          if (code === 0) resolve();
-          else
+          if (code === 0) {
+            resolve();
+          } else {
             reject(
               new Error(stderr.trim() || `tshark beendet (${code ?? signal})`),
             );
+          }
         });
       });
       return await fs.promises.readFile(output, "utf8");

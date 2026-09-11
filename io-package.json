@@ -2,10 +2,24 @@
   "common": {
     "name": "netwatch",
     "version": "0.1.1",
-    "titleLang": { "en": "Network Analyzer", "de": "Netzwerkanalyse" },
+    "titleLang": {
+      "en": "Network Analyzer", "de": "Netzwerkanalyse", "ru": "Network Analyzer",
+      "pt": "Network Analyzer", "nl": "Network Analyzer", "fr": "Network Analyzer",
+      "it": "Network Analyzer", "es": "Network Analyzer", "pl": "Network Analyzer",
+      "uk": "Network Analyzer", "zh-cn": "Network Analyzer"
+    },
     "desc": {
       "en": "Passive packet capture and analysis using Wireshark tools",
-      "de": "Passive Paketerfassung und Analyse mit Wireshark-Werkzeugen"
+      "de": "Passive Paketerfassung und Analyse mit Wireshark-Werkzeugen",
+      "ru": "Passive packet capture and analysis using Wireshark tools",
+      "pt": "Passive packet capture and analysis using Wireshark tools",
+      "nl": "Passive packet capture and analysis using Wireshark tools",
+      "fr": "Passive packet capture and analysis using Wireshark tools",
+      "it": "Passive packet capture and analysis using Wireshark tools",
+      "es": "Passive packet capture and analysis using Wireshark tools",
+      "pl": "Passive packet capture and analysis using Wireshark tools",
+      "uk": "Passive packet capture and analysis using Wireshark tools",
+      "zh-cn": "Passive packet capture and analysis using Wireshark tools"
     },
     "authors": ["TheBam1990"],
     "licenseInformation": { "type": "free", "license": "MIT" },
@@ -14,6 +28,7 @@
     "extIcon": "https://raw.githubusercontent.com/TheBam1990/ioBroker.netwatch/main/admin/netwatch.svg",
     "mode": "daemon",
     "type": "network",
+    "keywords": ["network", "packet", "capture", "wireshark", "tshark", "pcapng"],
     "tier": 3,
     "compact": true,
     "connectionType": "local",
@@ -26,15 +41,34 @@
     "news": {
       "0.1.1": {
         "en": "Added guided system setup, capture permission checks and a new adapter icon",
-        "de": "Geführte Systemeinrichtung, Prüfung der Capture-Rechte und neues Adaptersymbol ergänzt"
+        "de": "Geführte Systemeinrichtung, Prüfung der Capture-Rechte und neues Adaptersymbol ergänzt",
+        "ru": "Added guided system setup, capture permission checks and a new adapter icon",
+        "pt": "Added guided system setup, capture permission checks and a new adapter icon",
+        "nl": "Added guided system setup, capture permission checks and a new adapter icon",
+        "fr": "Added guided system setup, capture permission checks and a new adapter icon",
+        "it": "Added guided system setup, capture permission checks and a new adapter icon",
+        "es": "Added guided system setup, capture permission checks and a new adapter icon",
+        "pl": "Added guided system setup, capture permission checks and a new adapter icon",
+        "uk": "Added guided system setup, capture permission checks and a new adapter icon",
+        "zh-cn": "Added guided system setup, capture permission checks and a new adapter icon"
       },
       "0.1.0": {
         "en": "Initial packet capture and analysis release",
-        "de": "Erste Version zur Paketerfassung und Netzwerkanalyse"
+        "de": "Erste Version zur Paketerfassung und Netzwerkanalyse",
+        "ru": "Initial packet capture and analysis release",
+        "pt": "Initial packet capture and analysis release",
+        "nl": "Initial packet capture and analysis release",
+        "fr": "Initial packet capture and analysis release",
+        "it": "Initial packet capture and analysis release",
+        "es": "Initial packet capture and analysis release",
+        "pl": "Initial packet capture and analysis release",
+        "uk": "Initial packet capture and analysis release",
+        "zh-cn": "Initial packet capture and analysis release"
       }
     }
   },
   "encryptedNative": ["webPassword"],
+  "protectedNative": ["webPassword"],
   "native": {
     "captureInterface": "eth0",
     "autoStart": false,
